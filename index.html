@@ -1,259 +1,235 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Musical Scales & Modes Visualizer</title>
-  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="text/babel" data-type="module">
-    const { useState } = React;
-    
-    // Music icon component
-    function Music({ className }) {
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 18V5l12-2v13"></path>
-          <circle cx="6" cy="18" r="3"></circle>
-          <circle cx="18" cy="16" r="3"></circle>
-        </svg>
-      );
-    }
-    
-    function ScaleModeVisualizer() {
-      const [selectedKey, setSelectedKey] = useState('C');
-      const [selectedMode, setSelectedMode] = useState('major');
+import React, { useState } from 'react';
+import { Music } from 'lucide-react';
 
-      const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const ScaleModeVisualizer = () => {
+  const [selectedKey, setSelectedKey] = useState('C');
+  const [selectedMode, setSelectedMode] = useState('major');
+
+  const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  
+  const modes = {
+    major: { name: 'Major (Ionian)', intervals: [0, 2, 4, 5, 7, 9, 11] },
+    minor: { name: 'Natural Minor (Aeolian)', intervals: [0, 2, 3, 5, 7, 8, 10] },
+    dorian: { name: 'Dorian', intervals: [0, 2, 3, 5, 7, 9, 10] },
+    phrygian: { name: 'Phrygian', intervals: [0, 1, 3, 5, 7, 8, 10] },
+    lydian: { name: 'Lydian', intervals: [0, 2, 4, 6, 7, 9, 11] },
+    mixolydian: { name: 'Mixolydian', intervals: [0, 2, 4, 5, 7, 9, 10] },
+    locrian: { name: 'Locrian', intervals: [0, 1, 3, 5, 6, 8, 10] },
+    harmonicMinor: { name: 'Harmonic Minor', intervals: [0, 2, 3, 5, 7, 8, 11] },
+    melodicMinor: { name: 'Melodic Minor', intervals: [0, 2, 3, 5, 7, 9, 11] }
+  };
+
+  const chordQualities = {
+    major: ['maj', 'min', 'min', 'maj', 'maj', 'min', 'dim'],
+    minor: ['min', 'dim', 'maj', 'min', 'min', 'maj', 'maj'],
+    dorian: ['min', 'min', 'maj', 'maj', 'min', 'dim', 'maj'],
+    phrygian: ['min', 'maj', 'maj', 'min', 'dim', 'maj', 'min'],
+    lydian: ['maj', 'maj', 'min', 'dim', 'maj', 'min', 'min'],
+    mixolydian: ['maj', 'min', 'dim', 'maj', 'min', 'min', 'maj'],
+    locrian: ['dim', 'maj', 'min', 'min', 'maj', 'maj', 'min'],
+    harmonicMinor: ['min', 'dim', 'aug', 'min', 'maj', 'maj', 'dim'],
+    melodicMinor: ['min', 'min', 'aug', 'maj', 'maj', 'dim', 'dim']
+  };
+
+  const degreeSymbols = {
+    major: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
+    minor: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'],
+    dorian: ['i', 'ii', 'III', 'IV', 'v', 'vi°', 'VII'],
+    phrygian: ['i', 'II', 'III', 'iv', 'v°', 'VI', 'vii'],
+    lydian: ['I', 'II', 'iii', '#iv°', 'V', 'vi', 'vii'],
+    mixolydian: ['I', 'ii', 'iii°', 'IV', 'v', 'vi', 'VII'],
+    locrian: ['i°', 'II', 'iii', 'iv', 'V', 'VI', 'vii'],
+    harmonicMinor: ['i', 'ii°', 'III+', 'iv', 'V', 'VI', 'vii°'],
+    melodicMinor: ['i', 'ii', 'III+', 'IV', 'V', 'vi°', 'vii°']
+  };
+
+  const getScaleNotes = () => {
+    const rootIndex = keys.indexOf(selectedKey);
+    const intervals = modes[selectedMode].intervals;
+    return intervals.map(interval => keys[(rootIndex + interval) % 12]);
+  };
+
+  const getChords = () => {
+    const scaleNotes = getScaleNotes();
+    const intervals = modes[selectedMode].intervals;
+    const rootIndex = keys.indexOf(selectedKey);
+    const qualities = chordQualities[selectedMode];
+    const degrees = degreeSymbols[selectedMode];
+
+    return scaleNotes.map((note, i) => {
+      const third = scaleNotes[(i + 2) % 7];
+      const fifth = scaleNotes[(i + 4) % 7];
       
-      const modes = {
-        major: { name: 'Major (Ionian)', intervals: [0, 2, 4, 5, 7, 9, 11] },
-        minor: { name: 'Natural Minor (Aeolian)', intervals: [0, 2, 3, 5, 7, 8, 10] },
-        dorian: { name: 'Dorian', intervals: [0, 2, 3, 5, 7, 9, 10] },
-        phrygian: { name: 'Phrygian', intervals: [0, 1, 3, 5, 7, 8, 10] },
-        lydian: { name: 'Lydian', intervals: [0, 2, 4, 6, 7, 9, 11] },
-        mixolydian: { name: 'Mixolydian', intervals: [0, 2, 4, 5, 7, 9, 10] },
-        locrian: { name: 'Locrian', intervals: [0, 1, 3, 5, 6, 8, 10] },
-        harmonicMinor: { name: 'Harmonic Minor', intervals: [0, 2, 3, 5, 7, 8, 11] },
-        melodicMinor: { name: 'Melodic Minor', intervals: [0, 2, 3, 5, 7, 9, 11] }
+      const chordIntervals = [
+        intervals[i],
+        intervals[(i + 2) % 7],
+        intervals[(i + 4) % 7]
+      ].map(int => (rootIndex + int) % 12);
+
+      return {
+        root: note,
+        quality: qualities[i],
+        degree: degrees[i],
+        notes: [note, third, fifth],
+        noteIndices: chordIntervals
       };
+    });
+  };
 
-      const chordQualities = {
-        major: ['maj', 'min', 'min', 'maj', 'maj', 'min', 'dim'],
-        minor: ['min', 'dim', 'maj', 'min', 'min', 'maj', 'maj'],
-        dorian: ['min', 'min', 'maj', 'maj', 'min', 'dim', 'maj'],
-        phrygian: ['min', 'maj', 'maj', 'min', 'dim', 'maj', 'min'],
-        lydian: ['maj', 'maj', 'min', 'dim', 'maj', 'min', 'min'],
-        mixolydian: ['maj', 'min', 'dim', 'maj', 'min', 'min', 'maj'],
-        locrian: ['dim', 'maj', 'min', 'min', 'maj', 'maj', 'min'],
-        harmonicMinor: ['min', 'dim', 'aug', 'min', 'maj', 'maj', 'dim'],
-        melodicMinor: ['min', 'min', 'aug', 'maj', 'maj', 'dim', 'dim']
-      };
-
-      const degreeSymbols = {
-        major: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
-        minor: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'],
-        dorian: ['i', 'ii', 'III', 'IV', 'v', 'vi°', 'VII'],
-        phrygian: ['i', 'II', 'III', 'iv', 'v°', 'VI', 'vii'],
-        lydian: ['I', 'II', 'iii', '#iv°', 'V', 'vi', 'vii'],
-        mixolydian: ['I', 'ii', 'iii°', 'IV', 'v', 'vi', 'VII'],
-        locrian: ['i°', 'II', 'iii', 'iv', 'V', 'VI', 'vii'],
-        harmonicMinor: ['i', 'ii°', 'III+', 'iv', 'V', 'VI', 'vii°'],
-        melodicMinor: ['i', 'ii', 'III+', 'IV', 'V', 'vi°', 'vii°']
-      };
-
-      function getScaleNotes() {
-        const rootIndex = keys.indexOf(selectedKey);
-        const intervals = modes[selectedMode].intervals;
-        return intervals.map(interval => keys[(rootIndex + interval) % 12]);
-      }
-
-      function getChords() {
-        const scaleNotes = getScaleNotes();
-        const intervals = modes[selectedMode].intervals;
-        const rootIndex = keys.indexOf(selectedKey);
-        const qualities = chordQualities[selectedMode];
-        const degrees = degreeSymbols[selectedMode];
-
-        return scaleNotes.map((note, i) => {
-          const third = scaleNotes[(i + 2) % 7];
-          const fifth = scaleNotes[(i + 4) % 7];
-          
-          const chordIntervals = [
-            intervals[i],
-            intervals[(i + 2) % 7],
-            intervals[(i + 4) % 7]
-          ].map(int => (rootIndex + int) % 12);
-
-          return {
-            root: note,
-            quality: qualities[i],
-            degree: degrees[i],
-            notes: [note, third, fifth],
-            noteIndices: chordIntervals
-          };
-        });
-      }
-
-      function Piano({ highlightedNotes, isSmall = false }) {
-        const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-        const blackKeyPositions = {
-          'C#': 0, 'D#': 1, 'F#': 3, 'G#': 4, 'A#': 5
-        };
-        
-        const whiteWidth = isSmall ? 24 : 32;
-        const whiteHeight = isSmall ? 90 : 120;
-        const blackWidth = isSmall ? 15 : 20;
-        const blackHeight = isSmall ? 56 : 75;
-        
-        return (
-          <div className="inline-block bg-gray-800 p-2 rounded-lg">
-            <div className="relative" style={{ height: `${whiteHeight + 4}px` }}>
-              <div className="flex relative">
-                {[...whiteKeys, ...whiteKeys].map((note, idx) => {
-                  const noteIndex = keys.indexOf(note);
-                  const isHighlighted = highlightedNotes.includes(noteIndex);
-                  
-                  return (
-                    <div
-                      key={`white-${idx}`}
-                      className={`relative border-2 border-gray-700 rounded-b-lg transition-all ${
-                        isHighlighted 
-                          ? 'bg-blue-400 border-blue-600' 
-                          : 'bg-white'
-                      }`}
-                      style={{
-                        width: `${whiteWidth}px`,
-                        height: `${whiteHeight}px`,
-                        marginRight: '1px'
-                      }}
-                    >
-                      <div className="absolute bottom-2 left-0 right-0 text-center text-xs text-gray-700 font-semibold">
-                        {note}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+  const Piano = ({ highlightedNotes, isSmall = false }) => {
+    const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    const blackKeyPositions = {
+      'C#': 0, 'D#': 1, 'F#': 3, 'G#': 4, 'A#': 5
+    };
+    
+    // Responsive sizing based on screen width
+    const isMobile = window.innerWidth < 640;
+    const whiteWidth = isSmall ? (isMobile ? 18 : 24) : (isMobile ? 22 : 32);
+    const whiteHeight = isSmall ? (isMobile ? 70 : 90) : (isMobile ? 90 : 120);
+    const blackWidth = isSmall ? (isMobile ? 11 : 15) : (isMobile ? 14 : 20);
+    const blackHeight = isSmall ? (isMobile ? 44 : 56) : (isMobile ? 56 : 75);
+    
+    return (
+      <div className="inline-block bg-gray-800 p-2 rounded-lg">
+        <div className="relative" style={{ height: `${whiteHeight + 4}px` }}>
+          {/* White keys for 2 octaves */}
+          <div className="flex relative">
+            {[...whiteKeys, ...whiteKeys].map((note, idx) => {
+              const noteIndex = keys.indexOf(note);
+              const isHighlighted = highlightedNotes.includes(noteIndex);
               
-              {Object.entries(blackKeyPositions).map(([note, position]) => {
-                const noteIndex = keys.indexOf(note);
-                const isHighlighted = highlightedNotes.includes(noteIndex);
-                
-                return [0, 7].map(octaveOffset => (
-                  <div
-                    key={`black-${note}-${octaveOffset}`}
-                    className={`absolute rounded-b-lg border-2 transition-all ${
-                      isHighlighted 
-                        ? 'bg-blue-600 border-blue-800' 
-                        : 'bg-gray-900 border-black'
-                    }`}
-                    style={{
-                      width: `${blackWidth}px`,
-                      height: `${blackHeight}px`,
-                      left: `${(position + octaveOffset) * (whiteWidth + 1) + whiteWidth - blackWidth/2 + 1}px`,
-                      top: '0',
-                      zIndex: 10
-                    }}
-                  />
-                ));
-              })}
+              return (
+                <div
+                  key={`white-${idx}`}
+                  className={`relative border-2 border-gray-700 rounded-b-lg transition-all ${
+                    isHighlighted 
+                      ? 'bg-blue-400 border-blue-600' 
+                      : 'bg-white'
+                  }`}
+                  style={{
+                    width: `${whiteWidth}px`,
+                    height: `${whiteHeight}px`,
+                    marginRight: '1px'
+                  }}
+                >
+                  <div className="absolute bottom-2 left-0 right-0 text-center text-xs text-gray-700 font-semibold">
+                    {note}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Black keys */}
+          {Object.entries(blackKeyPositions).map(([note, position]) => {
+            const noteIndex = keys.indexOf(note);
+            const isHighlighted = highlightedNotes.includes(noteIndex);
+            
+            return [0, 7].map(octaveOffset => (
+              <div
+                key={`black-${note}-${octaveOffset}`}
+                className={`absolute rounded-b-lg border-2 transition-all ${
+                  isHighlighted 
+                    ? 'bg-blue-600 border-blue-800' 
+                    : 'bg-gray-900 border-black'
+                }`}
+                style={{
+                  width: `${blackWidth}px`,
+                  height: `${blackHeight}px`,
+                  left: `${(position + octaveOffset) * (whiteWidth + 1) + whiteWidth - blackWidth/2 + 1}px`,
+                  top: '0',
+                  zIndex: 10
+                }}
+              />
+            ));
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const scaleNotes = getScaleNotes();
+  const scaleIndices = scaleNotes.map(note => keys.indexOf(note));
+  const chords = getChords();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Music className="w-8 h-8 text-purple-600" />
+            <h1 className="text-3xl font-bold text-gray-800">Musical Scales & Modes Visualizer</h1>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6 mb-8">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Key</label>
+              <select
+                value={selectedKey}
+                onChange={(e) => setSelectedKey(e.target.value)}
+                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+              >
+                {keys.map(key => (
+                  <option key={key} value={key}>{key}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Mode/Scale</label>
+              <select
+                value={selectedMode}
+                onChange={(e) => setSelectedMode(e.target.value)}
+                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+              >
+                {Object.entries(modes).map(([key, value]) => (
+                  <option key={key} value={key}>{value.name}</option>
+                ))}
+              </select>
             </div>
           </div>
-        );
-      }
 
-      const scaleNotes = getScaleNotes();
-      const scaleIndices = scaleNotes.map(note => keys.indexOf(note));
-      const chords = getChords();
-
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-              <div className="flex items-center gap-3 mb-6">
-                <Music className="w-8 h-8 text-purple-600" />
-                <h1 className="text-3xl font-bold text-gray-800">Musical Scales & Modes Visualizer</h1>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Key</label>
-                  <select
-                    value={selectedKey}
-                    onChange={(e) => setSelectedKey(e.target.value)}
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
-                  >
-                    {keys.map(key => (
-                      <option key={key} value={key}>{key}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Mode/Scale</label>
-                  <select
-                    value={selectedMode}
-                    onChange={(e) => setSelectedMode(e.target.value)}
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
-                  >
-                    {Object.entries(modes).map(([key, value]) => (
-                      <option key={key} value={key}>{value.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  {selectedKey} {modes[selectedMode].name} Scale
-                </h2>
-                <div className="mb-4">
-                  <div className="text-sm text-gray-600 mb-2">Notes: {scaleNotes.join(' - ')}</div>
-                </div>
-                <div className="flex justify-center pb-4">
-                  <Piano highlightedNotes={scaleIndices} />
-                </div>
-              </div>
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {selectedKey} {modes[selectedMode].name} Scale
+            </h2>
+            <div className="mb-4">
+              <div className="text-sm text-gray-600 mb-2">Notes: {scaleNotes.join(' - ')}</div>
             </div>
-
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Diatonic Chords</h2>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {chords.map((chord, idx) => (
-                  <div key={idx} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 border-2 border-gray-200">
-                    <div className="mb-2">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-base font-bold text-purple-600">{chord.degree}</span>
-                        <span className="text-lg font-semibold text-gray-800">
-                          {chord.root}
-                          {chord.quality === 'maj' ? '' : chord.quality === 'min' ? 'm' : chord.quality === 'dim' ? '°' : '+'}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">
-                        {chord.notes.join(' - ')}
-                      </div>
-                    </div>
-                    <div className="flex justify-center">
-                      <Piano highlightedNotes={chord.noteIndices} isSmall={true} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="flex justify-center pb-4">
+              <Piano highlightedNotes={scaleIndices} />
             </div>
           </div>
         </div>
-      );
-    }
-    
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<ScaleModeVisualizer />);
-  </script>
-</body>
-</html>
+
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Diatonic Chords</h2>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {chords.map((chord, idx) => (
+              <div key={idx} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 border-2 border-gray-200">
+                <div className="mb-2">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-base font-bold text-purple-600">{chord.degree}</span>
+                    <span className="text-lg font-semibold text-gray-800">
+                      {chord.root}
+                      {chord.quality === 'maj' ? '' : chord.quality === 'min' ? 'm' : chord.quality === 'dim' ? '°' : '+'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {chord.notes.join(' - ')}
+                  </div>
+                </div>
+                <div className="flex justify-center">
+                  <Piano highlightedNotes={chord.noteIndices} isSmall={true} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ScaleModeVisualizer;
