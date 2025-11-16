@@ -113,7 +113,7 @@
         });
       }
 
-      function Piano({ highlightedNotes, isSmall = false }) {
+      function Piano({ highlightedNotes, isSmall = false, oneOctave = false }) {
         const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
         const blackKeyPositions = {
           'C#': 0, 'D#': 1, 'F#': 3, 'G#': 4, 'A#': 5
@@ -125,11 +125,15 @@
         const blackWidth = isSmall ? (isMobile ? 11 : 15) : (isMobile ? 14 : 20);
         const blackHeight = isSmall ? (isMobile ? 44 : 56) : (isMobile ? 56 : 75);
         
+        // Use one or two octaves based on prop
+        const octaves = oneOctave ? [whiteKeys] : [whiteKeys, whiteKeys];
+        const flattenedKeys = octaves.flat();
+        
         return (
           <div className="inline-block bg-gray-800 p-2 rounded-lg">
             <div className="relative" style={{ height: `${whiteHeight + 4}px` }}>
               <div className="flex relative">
-                {[...whiteKeys, ...whiteKeys].map((note, idx) => {
+                {flattenedKeys.map((note, idx) => {
                   const noteIndex = keys.indexOf(note);
                   const isHighlighted = highlightedNotes.includes(noteIndex);
                   
@@ -159,7 +163,8 @@
                 const noteIndex = keys.indexOf(note);
                 const isHighlighted = highlightedNotes.includes(noteIndex);
                 
-                return [0, 7].map(octaveOffset => (
+                const octaveCount = oneOctave ? [0] : [0, 7];
+                return octaveCount.map(octaveOffset => (
                   <div
                     key={`black-${note}-${octaveOffset}`}
                     className={`absolute rounded-b-lg border-2 transition-all ${
@@ -231,7 +236,7 @@
                   <div className="text-xs sm:text-sm text-gray-600 mb-2">Notes: {scaleNotes.join(' - ')}</div>
                 </div>
                 <div className="flex justify-center pb-2 sm:pb-4 overflow-x-auto">
-                  <Piano highlightedNotes={scaleIndices} />
+                  <Piano highlightedNotes={scaleIndices} oneOctave={true} />
                 </div>
               </div>
             </div>
